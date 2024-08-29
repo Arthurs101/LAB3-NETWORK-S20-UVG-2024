@@ -26,9 +26,10 @@ public class XmppClient {
      * @throws InterruptedException
      */
     public XmppClient (String JID, String password) throws SmackException, IOException, XMPPException, InterruptedException { 
-        String domain = JID.split(":")[1];
+        String domain = JID.split("@")[1];
+        String uname = JID.split("@")[0];
         XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
-            .setUsernameAndPassword(JID, password)
+            .setUsernameAndPassword(uname, password)
             .setXmppDomain(domain)
             .setHost(domain)
             .setPort(5222)
@@ -45,13 +46,22 @@ public class XmppClient {
             this.connection.disconnect();
         }
     }
-     public void sendMessage(String to, String messageBody) throws Exception {
+    public void sendMessage(String to, String messageBody) throws Exception {
         if (connection != null && connection.isAuthenticated()) {
             ChatManager chatManager = ChatManager.getInstanceFor(this.connection);
             Chat chat = chatManager.chatWith(JidCreate.entityBareFrom(to));
             chat.send(messageBody);
         } else {
             throw new Exception("is not conected");
+        }
+    }
+    public ChatManager getChatManagerListener() {
+        if (this.connection != null && this.connection.isAuthenticated()) {
+        ChatManager chatManager = ChatManager.getInstanceFor(connection);
+
+        return chatManager;
+        } else {
+            return null;
         }
     }
 }

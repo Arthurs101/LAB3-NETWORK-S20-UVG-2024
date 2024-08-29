@@ -3,11 +3,11 @@ package com.networks;
 import com.google.gson.Gson;
 
 public class MessageData {
-    private String type;
-    private String from;
-    private String to;
-    private int hops;
-    private String payload;
+    private final String type;
+    private final String from;
+    private final String to;
+    private final int hops;
+    private final String payload;
 
     // Constructor
     public MessageData(String type, String from, String to, int hops, String payload) {
@@ -47,5 +47,9 @@ public class MessageData {
     // Parse JSON string to object
     public static MessageData fromJson(String json) {
         return new Gson().fromJson(json, MessageData.class);
+    }
+    @Override
+    public String toString() {
+        return  this.type+"-"+this.from+'-'+this.to+'-';
     }
 }
