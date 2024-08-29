@@ -156,7 +156,26 @@ public class LinkStateRoutingNode extends NetworkNode {
             }
         }
     }
-
+    public void logNetworkState(){
+        System.out.println("--- Network State for" + this.myJID  +"---");
+        System.out.println("Neighbors:");
+        neighbors.forEach((k,v) -> {
+            System.out.println(k + " :" + v);
+        });
+        System.out.println("Costos:");
+        costs.forEach((k,v) -> {
+            System.out.println(k + " :" + v);
+        });
+        System.out.println("Link state DB:");
+        linkStateDB.forEach((k,v) -> {
+            System.out.println(k);
+            v.forEach((t,z) -> {System.out.println(t + " : " + z);});
+        });
+        System.out.println("Routing Table:");
+        this.routingTable.forEach((k,v) -> {
+            System.out.println(k + " : " + v.toString());});
+        System.out.println("-----------------------------\n");
+    }
     private void log(String level, String message) {
         if (verbose || "IMPORTANT".equals(level) || "ERROR".equals(level)) {
             System.out.println(this.myJID + " - " + level + " - " + message);

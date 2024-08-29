@@ -7,6 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -109,16 +112,43 @@ public class Main {
 
         //test sending a message to the server using the node A to H
         System.out.println("Sending test message to the server");
-        MessageData message = new MessageData(
-            "message",
-            namesConfig.get("H").getAsString(),
-            namesConfig.get("A").getAsString(),
-            0,
-            "Hello my friend"
-        );
-        nodes.get("H").sendMessage(message);
-        MenuLoop(nodes);
-    }
+       
 
-    
+        // Initialize ScheduledExecutorService with a single thread
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        // Task to wait for routing tables to stabilize
+        Runnable logNetworkStateTask = () -> {
+            for (String nodeId : nodes.keySet()) {
+                LinkStateRoutingNode node = (LinkStateRoutingNode) nodes.get(nodeId);
+                node.logNetworkState();
+            }
+        };
+
+        // Schedule the task to run after 10 seconds
+        scheduler.schedule(logNetworkStateTask, 10, TimeUnit.SECONDS);
+
+        // Task to simulate sending a message
+        Runnable sendMessageTask = () -> {
+            MessageData message = new MessageData(
+                "message",
+                namesConfig.get("F").getAsString(),
+                namesConfig.get("E").getAsString(),
+                0,
+                "Hello my friend"
+            );
+            
+            nodes.get("F").sendMessage(message);
+        };
+
+        // Schedule the task to run after 15 seconds
+        scheduler.schedule(sendMessageTask, 15, TimeUnit.SECONDS);
+
+        // Optionally, shut down the scheduler if you don't need it anymore
+        scheduler.shutdown();
+        MenuLoop(nodes);
+        }
+           
+
+            
 }
