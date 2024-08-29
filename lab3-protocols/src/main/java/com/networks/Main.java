@@ -8,18 +8,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class Main {
     private static void MenuLoop(Map<String, FloodingRoutingNode> nodes){
-        Scanner myObj = new Scanner(System.in);  // Create a Scanner object
-        String action = "";  // Read user input
-        while(!action.equals("quit")){
-            System.out.println("Awaiting for action ");
-            action = myObj.nextLine();
+        try (Scanner myObj = new Scanner(System.in)) {
+            String action = "";  // Read user input
+            while(!action.equals("quit")){
+                System.out.println("Awaiting for action ");
+                action = myObj.nextLine();
+            }
         }
         nodes.forEach((ID,node) ->{
             node.terminateNode();
@@ -27,7 +27,6 @@ public class Main {
         });
     }
     public static void main(String[] args) {
-        Gson gson = new Gson();
         Map<String, FloodingRoutingNode> nodes = new HashMap<>();
         String password = "prueba2024"; // all have the same, dont ask question k?
 
