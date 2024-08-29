@@ -45,7 +45,7 @@ public abstract class NetworkNode {
             System.err.println("Failed to send message to " + to + ": " + e.getMessage());
         }
     }
-
+    public abstract void sendMessage(MessageData msg);
     // Abstract method to handle incoming messages
     public abstract void handleMessage(MessageData message);
 
@@ -58,5 +58,13 @@ public abstract class NetworkNode {
      */
     public String getJid(){
         return this.myJID;
+ 
+    }
+
+    /**
+     * disconects the node from the server
+     */
+    public void terminateNode(){
+        this.client.disconnect();
     }
 }

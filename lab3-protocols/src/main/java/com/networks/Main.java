@@ -11,9 +11,10 @@ import java.util.Scanner;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.networks.Abstracts.NetworkNode;
 
 public class Main {
-    private static void MenuLoop(Map<String, FloodingRoutingNode> nodes){
+    private static void MenuLoop(Map<String, NetworkNode> nodes){
         try (Scanner myObj = new Scanner(System.in)) {
             String action = "";  // Read user input
             while(!action.equals("quit")){
@@ -27,7 +28,7 @@ public class Main {
         });
     }
     public static void main(String[] args) {
-        Map<String, FloodingRoutingNode> nodes = new HashMap<>();
+        Map<String, NetworkNode> nodes = new HashMap<>();
         String password = "prueba2024"; // all have the same, dont ask question k?
 
 
@@ -82,14 +83,16 @@ public class Main {
 
             // Get the neighbors for the node from topo.json
             Map<String, String> neighbors = new HashMap<>();
+            Map<String, Integer> costs = new HashMap<>();
             for (JsonElement neighbor : topoConfig.getAsJsonArray(node)) {
                 // Fetch the neighbor's JID using its name from names.json
                 // is a  hashmap of node_ID : Node_JID
                 neighbors.put(neighbor.getAsString(), namesConfig.get(neighbor.getAsString()).getAsString());
+                costs.put(neighbor.getAsString(), 1);
             }
 
             // Create a FloodingRoutingNode instance
-            FloodingRoutingNode floodingNode = new FloodingRoutingNode(jid, password, neighbors);
+            LinkStateRoutingNode floodingNode = new LinkStateRoutingNode(jid, password, neighbors,costs,true);
             nodes.put(node, floodingNode);
         }
 
@@ -106,8 +109,14 @@ public class Main {
 
         //test sending a message to the server using the node A to H
         System.out.println("Sending test message to the server");
-        
-        nodes.get("A").sendMessage("Hello my friend", namesConfig.get("H").getAsString());
+        MessageData message = new MessageData(
+            "message",
+            namesConfig.get("H").getAsString(),
+            namesConfig.get("A").getAsString(),
+            0,
+            "Hello my friend"
+        );
+        nodes.get("H").sendMessage(message);
         MenuLoop(nodes);
     }
 

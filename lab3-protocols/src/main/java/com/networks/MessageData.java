@@ -1,5 +1,8 @@
 package com.networks;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.Gson;
 
 public class MessageData {
@@ -8,7 +11,7 @@ public class MessageData {
     private final String to;
     private final int hops;
     private final String payload;
-
+    private List<String> path;
     // Constructor
     public MessageData(String type, String from, String to, int hops, String payload) {
         this.type = type;
@@ -16,6 +19,7 @@ public class MessageData {
         this.to = to;
         this.hops = hops;
         this.payload = payload;
+        this.path = new ArrayList<>();
     }
 
     // Getters
@@ -38,11 +42,22 @@ public class MessageData {
     public String getPayload() {
         return payload;
     }
+    
+    public List<String> getPath(){
+        return this.path;
+    }
+    
+    //Setters
+    public void setPath(List<String> path) {
+        this.path = path;
+    }
 
     // Convert object to JSON string
     public String toJson() {
         return new Gson().toJson(this);
     }
+    
+    
 
     // Parse JSON string to object
     public static MessageData fromJson(String json) {

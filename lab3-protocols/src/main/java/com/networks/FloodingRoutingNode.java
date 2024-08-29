@@ -16,14 +16,6 @@ public class FloodingRoutingNode extends NetworkNode {    /**
     }
     
     /**
-     * disconects the node from the server
-     */
-    public void terminateNode(){
-        this.client.disconnect();
-    }
-
-
-    /**
      * Method to flood a message to all neighbors except the sender
      * @param  MessageData message instance of the message to send
      * @param String from , the user that sent the original message
@@ -86,18 +78,24 @@ public class FloodingRoutingNode extends NetworkNode {    /**
      * @param to recipient
      */
     @Override
-    public void sendMessage(String message, String to) {
+    public void sendMessage(String to, String payload) {
         try {
             MessageData forwardedMessage = new MessageData(
                 "message", // type of the message
                 this.myJID, // the from address
                 to, // the to address
                 0, // the amount of hops the message had to be forwarded
-                message// the payload ( the message )
+                payload// the payload ( the message )
             );
             handleMessage(forwardedMessage);
         } catch (Exception e) {
             System.err.print(e.getMessage());
         }
+    }
+
+    @Override
+    public void sendMessage(MessageData msg) {
+        // TODO Auto-generated method stub
+        handleMessage(msg);
     }
 }
