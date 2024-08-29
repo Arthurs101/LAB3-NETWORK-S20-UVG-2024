@@ -11,6 +11,8 @@ public class FloodingRoutingNode {
 
     /**
      * @param neighbours Map of neighbours, where is ID:JID the keypairs
+     * @param JID the jid for the node to connect to the server
+     * @param pwrd the password for the node
     */
     public FloodingRoutingNode(String JID, String pwrd, Map<String, String> neighbors) {
         try {

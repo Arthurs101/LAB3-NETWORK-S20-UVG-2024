@@ -4,10 +4,7 @@ package com.networks;
  * Node for the LinkStateRouting protocol
  */
 public class LinkStateRoutingNode {
-
-    // public LinkStateRoutingNode(String JID, String pword) {
-    //     super(JID, pword);
-    //     //TODO Auto-generated constructor stub
-    // }
-    
+    /**	
+     * TODO: Implement the classs and the LinkStateRouting 
+     */    
 }
