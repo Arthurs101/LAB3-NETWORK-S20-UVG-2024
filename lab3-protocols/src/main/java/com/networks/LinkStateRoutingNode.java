@@ -162,7 +162,7 @@ public class LinkStateRoutingNode extends NetworkNode {
                     current = previous.get(current);
                 }
                 if (path.size() > 1) {
-                    this.routingTable.put(node, Arrays.asList(path.get(1), distances.get(node)));
+                    this.routingTable.put(this.neighbors.get(node), Arrays.asList(path.get(1), distances.get(node)));
                 }
             }
         }
