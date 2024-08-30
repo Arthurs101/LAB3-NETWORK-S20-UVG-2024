@@ -1,18 +1,12 @@
-# Use an official Maven image as a parent image
+# Maven image
 FROM maven:3.9.4-eclipse-temurin-17
-
-# Set the working directory in the container
+# Working app directory
 WORKDIR /app
-
-# Copy the pom.xml and source code to the container
+# Copy dependencies
 COPY ./lab3-protocols/pom.xml .
+# Copy code source
 COPY ./lab3-protocols/src ./src
-
-# Build the application
-RUN mvn package
-
-# Specify the JAR file that will be executed
-CMD ["mvn", "exec:java", "-Dexec.mainClass=com.networks.Main"]
-
-# docker build -t lab3-networks .
-# docker run lab3-networks 
+# Compile the application
+RUN mvn clean install
+# Execute the JAR file
+CMD ["java", "-jar", "target/lab3-protocols-1.0-SNAPSHOT.jar"]
