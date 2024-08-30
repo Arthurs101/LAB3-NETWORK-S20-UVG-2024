@@ -2,7 +2,7 @@
 
 - Diego Alonzo 20172
 - Arturo Argueta 21527
-- Renato Guzmán
+- Renato Guzmán 21646
 
 ## How to run it?
 
