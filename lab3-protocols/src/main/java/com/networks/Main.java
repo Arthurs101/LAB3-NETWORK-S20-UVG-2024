@@ -6,19 +6,43 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.networks.Abstracts.NetworkNode;
 
 public class Main {
-    private static void Menu(){
-        
+    private static CompletableFuture<Map<String, LinkStateRoutingNode>> initializeNodesSequentially(JsonObject topoConfig, JsonObject namesConfig, String password) {
+        Map<String, LinkStateRoutingNode> nodes = new HashMap<>();
+        CompletableFuture<Void> futureChain = CompletableFuture.completedFuture(null);
+
+        // Iterate over each node in the topology configuration
+        for (String node : topoConfig.keySet()) {
+            futureChain = futureChain.thenComposeAsync(ignored -> {
+                String jid = namesConfig.get(node).getAsString();
+
+                // Get the neighbors for the node from topo.json
+                Map<String, String> neighbors = new HashMap<>();
+                Map<String, Integer> costs = new HashMap<>();
+                for (JsonElement neighbor : topoConfig.getAsJsonArray(node)) {
+                    // Fetch the neighbor's JID using its name from names.json
+                    neighbors.put(neighbor.getAsString(), namesConfig.get(neighbor.getAsString()).getAsString());
+                    costs.put(neighbor.getAsString(), 1);
+                }
+
+                // Create a LinkStateRoutingNode instance
+                LinkStateRoutingNode routingNode = new LinkStateRoutingNode(jid, password, neighbors, costs, true);
+                nodes.put(node, routingNode);
+
+                // Start the node asynchronously and wait for it to be online
+                return CompletableFuture.runAsync(() -> System.out.println("Node initialized: " + jid));
+            });
+        }
+
+        return futureChain.thenApply(ignored -> nodes);
     }
     public static void main(String[] args) {
-        Map<String, NetworkNode> nodes = new HashMap<>();
         String password = "prueba2024"; // all have the same, dont ask question k?
 
 
@@ -66,25 +90,40 @@ public class Main {
         JsonObject namesConfig = namesJson.getAsJsonObject("config");
         System.out.println(namesConfig); 
 
-        // Iterate over each node in the topology configuration
-        for (String node : topoConfig.keySet()) {
-            // Get the JID for the node from names.json
-            String jid = namesConfig.get(node).getAsString();
+        // Initialize nodes sequentially
+            initializeNodesSequentially(topoConfig, namesConfig, password).thenComposeAsync(nodes -> {
+                System.out.println("All nodes are online. Starting LSR propagation...");
 
-            // Get the neighbors for the node from topo.json
-            Map<String, String> neighbors = new HashMap<>();
-            Map<String, Integer> costs = new HashMap<>();
-            for (JsonElement neighbor : topoConfig.getAsJsonArray(node)) {
-                // Fetch the neighbor's JID using its name from names.json
-                // is a  hashmap of node_ID : Node_JID
-                neighbors.put(neighbor.getAsString(), namesConfig.get(neighbor.getAsString()).getAsString());
-                costs.put(neighbor.getAsString(), 1);
-            }
+                // Step 2: Share LSR propagation for all nodes asynchronously
+                CompletableFuture<Void> shareFuture = CompletableFuture.allOf(
+                        nodes.values().stream()
+                                .map(node -> CompletableFuture.runAsync(node::shareLinkState))
+                                .toArray(CompletableFuture[]::new)
+                );
 
-            // Create a FloodingRoutingNode instance
-            LinkStateRoutingNode floodingNode = new LinkStateRoutingNode(jid, password, neighbors,costs,true);
-            nodes.put(node, floodingNode);
-        }
+                // Step 3: After LSR propagation, wait for routing tables to stabilize
+                return shareFuture.thenRunAsync(() -> {
+                    try {
+                        Thread.sleep(10000); // Wait for 10 seconds for stabilization
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    for (LinkStateRoutingNode node : nodes.values()) {
+                        node.logNetworkState();
+                    }
+                }).thenRunAsync(() -> {
+                    // Step 4: Simulate sending a message after stabilization
+                    MessageData message = new MessageData(
+                        "message",
+                        namesConfig.get("F").getAsString(),
+                        namesConfig.get("E").getAsString(),
+                        0,
+                        "Hello my friend"
+                    );
+                    
+                    nodes.get("F").sendMessage(message);
+                });
+            }).join();  // Block the main thread until all async tasks are done
 
         try {
             // Close file readers
@@ -95,40 +134,6 @@ public class Main {
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
-        System.out.println("Nodes created: " + nodes.keySet());
 
-
-        for (String nodeId : nodes.keySet()) {
-            LinkStateRoutingNode node = (LinkStateRoutingNode) nodes.get(nodeId);
-            node.shareLinkState();
-        }
-    
-    
-        try (Scanner scanner = new Scanner(System.in)) {
-            String input = "";
-            while (!input.equals("exit")) {
-                input = scanner.nextLine();
-                switch (input) {
-                    case "stadistics" -> {
-                        for (String nodeId : nodes.keySet()) {
-                            LinkStateRoutingNode node = (LinkStateRoutingNode) nodes.get(nodeId);
-                            node.logNetworkState();
-                        }
-                    }
-                    case "test_message" -> {
-                        MessageData message = new MessageData(
-                            "message",
-                            namesConfig.get("F").getAsString(),
-                            namesConfig.get("E").getAsString(),
-                            0,
-                            "Hello my friend"
-                        );
-                        
-                        nodes.get("F").sendMessage(message);
-                    }
-                    default -> System.out.println("use test_message or stadistics");
-                }
-            }
-        }
     }                 
 }
