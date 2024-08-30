@@ -17,7 +17,7 @@ public abstract class NetworkNode {
         try {
             this.client = new XmppClient(JID,password);
             this.myJID = JID;
-            System.out.println("Node conected into network" + JID);
+            System.out.println("Node conected into network : " + JID);
         } catch (Exception e) {
             System.err.println("Failed to connect node into the network " + JID + ": " + e.getMessage());
         }
@@ -28,6 +28,7 @@ public abstract class NetworkNode {
                 String fromJID =  from.toString();
                 String rawMessage = message.getBody();
                 MessageData data = MessageData.fromJson(rawMessage);
+                
                 this.handleMessage(data);
             });
         }
