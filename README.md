@@ -1,8 +1,8 @@
 # Lab 3 -> Networks
 
-Diego Alonzo 20172
-Arturo Argueta 21527
-Renato 
+- Diego Alonzo 20172
+- Arturo Argueta 21527
+- Renato Guzmán
 
 ## How to run it?
 
