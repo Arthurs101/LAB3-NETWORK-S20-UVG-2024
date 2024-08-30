@@ -88,10 +88,11 @@ public class LinkStateRoutingNode extends NetworkNode {
         for (String neighbor : neighbors.values()) {
             sendMessage(neighbor, message.toJson());
         }
+        System.out.println(this.myJID + " has finished sharing state");
     }
 
     private void updateLinkStateDB(String sourceJid, String costsJson) {
-        Map<String, Integer> costs = new Gson().fromJson(costsJson, HashMap.class);
+        Map<String, Integer> costs = new Gson().fromJson(costsJson, new com.google.gson.reflect.TypeToken<Map<String, Integer>>() {}.getType());
         this.linkStateDB.put(sourceJid, costs);
         log("INFO", "Updated Link State DB for " + sourceJid);
     }
@@ -123,7 +124,10 @@ public class LinkStateRoutingNode extends NetworkNode {
                     minNode = node;
                 }
             }
-
+            if (minNode == null) {
+                break;
+            }
+    
             // Remove the minimum node from the unvisited set
             nodes.remove(minNode);
 
@@ -131,8 +135,15 @@ public class LinkStateRoutingNode extends NetworkNode {
             Map<String, Integer> neighbors = this.linkStateDB.get(minNode);
             if (neighbors != null) {
                 for (Map.Entry<String, Integer> entry : neighbors.entrySet()) {
+                    Integer currentDistance = distances.get(minNode);
+                    if (currentDistance == null) {
+                        currentDistance = Integer.MAX_VALUE;
+                    }
+                    int alt = (int)currentDistance + (int)entry.getValue();
                     String neighbor = entry.getKey();
-                    int alt = distances.get(minNode) + entry.getValue();
+                    if (distances.get(neighbor) == null) {
+                        distances.put(neighbor,Integer.MAX_VALUE);
+                    }
                     if (alt < distances.get(neighbor)) {
                         distances.put(neighbor, alt);
                         previous.put(neighbor, minNode);

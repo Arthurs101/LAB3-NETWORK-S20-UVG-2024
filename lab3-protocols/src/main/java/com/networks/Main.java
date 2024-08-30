@@ -7,9 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,18 +14,8 @@ import com.google.gson.JsonParser;
 import com.networks.Abstracts.NetworkNode;
 
 public class Main {
-    private static void MenuLoop(Map<String, NetworkNode> nodes){
-        try (Scanner myObj = new Scanner(System.in)) {
-            String action = "";  // Read user input
-            while(!action.equals("quit")){
-                System.out.println("Awaiting for action ");
-                action = myObj.nextLine();
-            }
-        }
-        nodes.forEach((ID,node) ->{
-            node.terminateNode();
-            System.out.println("Terminated node :" + ID + " - " + node.getJid());
-        });
+    private static void Menu(){
+        
     }
     public static void main(String[] args) {
         Map<String, NetworkNode> nodes = new HashMap<>();
@@ -110,45 +97,38 @@ public class Main {
         }
         System.out.println("Nodes created: " + nodes.keySet());
 
-        //test sending a message to the server using the node A to H
-        System.out.println("Sending test message to the server");
-       
 
-        // Initialize ScheduledExecutorService with a single thread
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-        // Task to wait for routing tables to stabilize
-        Runnable logNetworkStateTask = () -> {
-            for (String nodeId : nodes.keySet()) {
-                LinkStateRoutingNode node = (LinkStateRoutingNode) nodes.get(nodeId);
-                node.logNetworkState();
-            }
-        };
-
-        // Schedule the task to run after 10 seconds
-        scheduler.schedule(logNetworkStateTask, 10, TimeUnit.SECONDS);
-
-        // Task to simulate sending a message
-        Runnable sendMessageTask = () -> {
-            MessageData message = new MessageData(
-                "message",
-                namesConfig.get("F").getAsString(),
-                namesConfig.get("E").getAsString(),
-                0,
-                "Hello my friend"
-            );
-            
-            nodes.get("F").sendMessage(message);
-        };
-
-        // Schedule the task to run after 15 seconds
-        scheduler.schedule(sendMessageTask, 15, TimeUnit.SECONDS);
-
-        // Optionally, shut down the scheduler if you don't need it anymore
-        scheduler.shutdown();
-        MenuLoop(nodes);
+        for (String nodeId : nodes.keySet()) {
+            LinkStateRoutingNode node = (LinkStateRoutingNode) nodes.get(nodeId);
+            node.shareLinkState();
         }
-           
-
-            
+    
+    
+        try (Scanner scanner = new Scanner(System.in)) {
+            String input = "";
+            while (!input.equals("exit")) {
+                input = scanner.nextLine();
+                switch (input) {
+                    case "stadistics" -> {
+                        for (String nodeId : nodes.keySet()) {
+                            LinkStateRoutingNode node = (LinkStateRoutingNode) nodes.get(nodeId);
+                            node.logNetworkState();
+                        }
+                    }
+                    case "test_message" -> {
+                        MessageData message = new MessageData(
+                            "message",
+                            namesConfig.get("F").getAsString(),
+                            namesConfig.get("E").getAsString(),
+                            0,
+                            "Hello my friend"
+                        );
+                        
+                        nodes.get("F").sendMessage(message);
+                    }
+                    default -> System.out.println("use test_message or stadistics");
+                }
+            }
+        }
+    }                 
 }
