@@ -53,7 +53,7 @@ public class LinkStateRoutingNode extends NetworkNode {
         } else {
             log("IMPORTANT", "Received a message from " + message.getFrom() + ": " + message.toString());
             if (message.getTo().equals(this.myJID)) {
-                log("IMPORTANT", "Message reached its destination: " + message.getPayload());
+                log("IMPORTANT", "Message reached received " + message.getPayload());
                 log("IMPORTANT", "Path taken: " + String.join(" -> ", message.getPath()));
                 log("IMPORTANT", "Number of hops: " + message.getHops());
             } else {

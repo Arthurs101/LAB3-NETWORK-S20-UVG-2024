@@ -57,15 +57,20 @@ public class FloodingRoutingNode extends NetworkNode {    /**
                         System.out.println("Raw maessage: " + message.toJson());
                         break;
                     } else{ //forward that message
+                        System.out.println("Forwarder message From: " + message.getFrom() + "to all neighbors");
                         floodMessage(message, message.getFrom());
                     }
                 }
                 case "message" -> {
                     if (message.getTo().equals(this.myJID)){ // is a node saluting this node
-                        System.out.println(this.myJID +" got messsage " + message.getPayload() + " From " + message.getFrom());
+                        System.out.println("I got messsage ");
+                        System.out.println("From : " +  message.getFrom() + "Content: " + message.getPayload() );
                         System.out.println("Raw maessage: " + message.toJson());
                     } else{ //forward that message
+                        if(!message.getFrom().equals(this.myJID)){
+                        System.out.println("Forwarder message From: " + message.getFrom() + " to all neighbors " + " to " + message.getTo());
                         floodMessage(message, message.getFrom());
+                        }
                     }
                 }
                 default -> throw new AssertionError();
