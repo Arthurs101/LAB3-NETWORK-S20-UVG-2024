@@ -121,6 +121,7 @@ public class Main {
                         System.out.println("""
                         msg: enviar un mensaje desde un nodo a otro
                         exit: salir 
+                        resync : re computar la tabla de routing
                         """);
                         option2 = scan.nextLine();
                         switch (option2) {
@@ -137,7 +138,16 @@ public class Main {
                                         payload
                                 );
                                 nodes.get(nodeToUse).sendMessage(message);
-                                
+                            }
+                            case "resync" -> {
+                                CompletableFuture<Void> shareFutureAgain = CompletableFuture.runAsync(nodes.get(nodeToUse)::shareLinkState);
+                                shareFutureAgain.thenRunAsync(() -> {
+                                    nodes.get(nodeToUse).logNetworkState();});
+                                    System.out.println("""
+                                        msg: enviar un mensaje desde un nodo a otro
+                                        exit: salir 
+                                        resync : re computar la tabla de routing
+                                        """);
                             }
                         }
                     }
